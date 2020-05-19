@@ -8,13 +8,18 @@
 using namespace cv;
 
 int main(int argv, char** argc) {
+    
+    if(argv < 3) {
+        std::cout << "Run with arguments: <path_to_input> <path_to_output>";
+    }
+
     Mat img = imread(argc[1], IMREAD_COLOR);     // read in image
     
     std::vector<Mat> three_channels;             
     split(img, three_channels);                  // seperate rgb into seperate channels 
 
     std::ofstream myfile;
-    myfile.open("12bitoutput", std::ios::out | std::ios::binary);
+    myfile.open(argc[2], std::ios::out | std::ios::binary);
 
     for(int i=0; i<img.rows; i++){                          // loop through y axis
         for(int j=0; j<img.cols; j++)                       // loop through x axis
@@ -47,20 +52,6 @@ int main(int argv, char** argc) {
     }
 
     myfile.close();
-    
-    unsigned char first_half = std::floor(three_channels.at(0).at<uchar>(600,300)/16);
-    
-    std::cout << "first half:  " << std::bitset<8>(first_half) << std::endl;
-
-    first_half <<= 4;
-    
-    std::cout << "first half shifted: " << std::bitset<8>(first_half) << std::endl;
-
-    unsigned char second_half = std::floor(three_channels.at(1).at<uchar>(600,300)/16);
-    
-    std::cout << "second half: " << std::bitset<8>(second_half) << std::endl;
-
-    std::cout << "ORed: " << std::bitset<8>( first_half | second_half ) ;
 
     
     // imshow("Colour", img);

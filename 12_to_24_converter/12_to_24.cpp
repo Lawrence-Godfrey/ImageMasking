@@ -1,23 +1,27 @@
-#include <opencv>
 #include <iostream>
-#include <vector>
-#include <utility>
-#include <bitset>
 #include <fstream>
 
-using namespace cv;
+int main(int argv, char** argc) {
 
-int main() {
+    if(argv < 3) {
+        std::cout << "Run with arguments: <path_to_input> <path_to_output>";
+    }
 
     std::ifstream image_12_bit;
-    image_12_bit.open("../24_to_12_converter/12bitoutput", std::ios::in | std::ios::binary);
+    image_12_bit.open(argc[1], std::ios::in | std::ios::binary);
+    if(image_12_bit.is_open()) {
+        std::cout << "12 bit input image read..." << std::endl;
+    }
 
     std::ofstream image_24_bit;
-    image_24_bit.open("24bitoutput.ppm", std::ios::out | std::ios::binary);
-
-    image_24_bit << "P6" << std::endl << "1200 1200" << std::endl << "255" << std::endl;
+    image_24_bit.open(std::string(argc[2]) + ".ppm", std::ios::out | std::ios::binary);
     
-    std::vector<unsigned char> image (); 
+    if(image_24_bit.is_open()) {
+        std::cout << "24 bit .ppm input output image created..." << std::endl;
+    }
+
+    image_24_bit << "P6" << std::endl << "320 240" << std::endl << "255" << std::endl;
+    
 
     unsigned char ch;
     while(image_12_bit.get((char &)ch)) {                     // loop through x axis
@@ -37,4 +41,5 @@ int main() {
     
     image_12_bit.close();
     image_24_bit.close();
+    std::cout << "Finished." << std::endl;
 }
