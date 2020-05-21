@@ -5,6 +5,7 @@ int main(int argv, char** argc) {
 
     if(argv < 3) {
         std::cout << "Run with arguments: <path_to_input> <path_to_output>";
+        return 0;
     }
 
     std::ifstream image_12_bit;
