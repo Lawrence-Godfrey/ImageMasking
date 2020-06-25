@@ -45,27 +45,36 @@ int main(int argv, char** argc) {
 
     unsigned char * masked_image_buffer = new unsigned char [length];
 
-    auto time = high_resolution_clock::now() - begin;
-    std::cout << "Time taken to read in images: " << duration<double, std::milli>(time).count() << ".\n";
+    
     
 
     const auto begin2 = high_resolution_clock::now();
     if(xor_only) {
+        auto time = high_resolution_clock::now() - begin;
+        std::cout << "Time taken to read in images: " << duration<double, std::milli>(time).count() << ".\n";
+    
         for(int i = 0; i < length; i++) {
             masked_image_buffer[i] = (image_buffer[i] ^ mask_buffer[i]) ;
         }
+    
+        time = high_resolution_clock::now() - begin2;
+        std::cout << "Time taken to mask image without and gates: " << duration<double, std::milli>(time).count() << ".\n";
+   
     }
     else {
+        auto time = high_resolution_clock::now() - begin;
+        std::cout << "Time taken to read in images: " << duration<double, std::milli>(time).count() << ".\n";
+
         for(int i = 0; i < length; i++) {
-            masked_image_buffer[i] = (image_buffer[i] ^ mask_buffer[i]) & (image_buffer[i]);
+            masked_image_buffer[i] = (image_buffer[i] & mask_buffer[i]);
         }
 
+        time = high_resolution_clock::now() - begin2;
+        std::cout << "Time taken to mask image with and gates: " << duration<double, std::milli>(time).count() << ".\n";
     }
     
     masked_image.write((char *)masked_image_buffer, length);
 
-    time = high_resolution_clock::now() - begin2;
-    std::cout << "Time taken to mask image: " << duration<double, std::milli>(time).count() << ".\n";
     
     image.close();
     mask.close();
