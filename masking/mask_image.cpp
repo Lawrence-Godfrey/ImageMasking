@@ -2,43 +2,39 @@
 #include <fstream>
 #include <chrono>
 #include <bitset>
+#include <thread>
+#include <vector>
 
 using namespace std::chrono;
 int main(int argv, char** argc) {
 
-    if(argv < 4) {
-        std::cout << "Run with arguments: <path_to_image> <path_to_mask> <path_to_output> <i (optional)>";
+    if(argv < 5) {
+        std::cout << "Run with arguments: <path_to_image1> <path_to_image2> <path_to_mask> <path_to_output>";
         return 0;
-    }
-
-    bool inverse = false;
-    bool xor_only = false;
-
-    if(argv == 5) {
-        if(argc[4][0] == 'i') {
-            inverse = true;
-        }
-        else if(argc[4][0] == 'x'){
-            xor_only = true;
-        }
     }
 
     const auto begin = high_resolution_clock::now();
 
-    std::ifstream image;
-    image.open(argc[1], std::ios::in | std::ios::binary);
+    std::ifstream image1;
+    image1.open(argc[1], std::ios::in | std::ios::binary);
+    
+    std::ifstream image2;
+    image2.open(argc[2], std::ios::in | std::ios::binary);
 
     std::ifstream mask;
-    mask.open(argc[2], std::ios::in | std::ios::binary);
+    mask.open(argc[3], std::ios::in | std::ios::binary);
 
     std::ofstream masked_image;
-    masked_image.open(argc[3], std::ios::out | std::ios::binary);
+    masked_image.open(argc[4], std::ios::out | std::ios::binary);
     
     
-    int length = 115200;
+    uint32_t length = 115200;
 
-    unsigned char * image_buffer = new unsigned char [length];
-    image.read((char *)image_buffer, length);
+    unsigned char * image_buffer1 = new unsigned char [length];
+    image1.read((char *)image_buffer1, length);
+
+    unsigned char * image_buffer2 = new unsigned char [length];
+    image2.read((char *)image_buffer2, length);
 
     unsigned char * mask_buffer = new unsigned char [length];
     mask.read((char *)mask_buffer, length);
@@ -48,35 +44,28 @@ int main(int argv, char** argc) {
     
     
 
+    auto time = high_resolution_clock::now() - begin;
+
+    std::cout << "Time taken to read in images: " << duration<double, std::milli>(time).count() << ".\n";
+
     const auto begin2 = high_resolution_clock::now();
-    if(xor_only) {
-        auto time = high_resolution_clock::now() - begin;
-        std::cout << "Time taken to read in images: " << duration<double, std::milli>(time).count() << ".\n";
-    
-        for(int i = 0; i < length; i++) {
-            masked_image_buffer[i] = (image_buffer[i] ^ mask_buffer[i]) ;
-        }
-    
-        time = high_resolution_clock::now() - begin2;
-        std::cout << "Time taken to mask image without and gates: " << duration<double, std::milli>(time).count() << ".\n";
+
+
+    for(uint32_t i = 0; i < length; i++) {
+        masked_image_buffer[i] = (image_buffer1[i] & ~mask_buffer[i]) ^ (image_buffer2[i] & mask_buffer[i]) ;
+    }
+  
+
+    time = high_resolution_clock::now() - begin2;
+    std::cout << "Time taken to mask image without and gates: " << duration<double, std::milli>(time).count() << ".\n";
    
-    }
-    else {
-        auto time = high_resolution_clock::now() - begin;
-        std::cout << "Time taken to read in images: " << duration<double, std::milli>(time).count() << ".\n";
-
-        for(int i = 0; i < length; i++) {
-            masked_image_buffer[i] = (image_buffer[i] & mask_buffer[i]);
-        }
-
-        time = high_resolution_clock::now() - begin2;
-        std::cout << "Time taken to mask image with and gates: " << duration<double, std::milli>(time).count() << ".\n";
-    }
+   
     
     masked_image.write((char *)masked_image_buffer, length);
 
     
-    image.close();
+    image1.close();
+    image2.close();
     mask.close();
     masked_image.close();
 }
